@@ -1,0 +1,18 @@
+#!/bin/bash
+
+test_zsh_config() {
+    echo "Testing zsh config..."
+    zsh -n ~/.zshrc && echo "✅ .zshrc syntax OK" || echo "❌ .zshrc syntax error"
+}
+
+test_tmux_config() {
+    echo "Testing tmux config..."
+    tmux -f ~/.tmux.conf list-keys >/dev/null 2>&1 && 
+        echo "✅ .tmux.conf OK" || echo "❌ .tmux.conf error"
+}
+
+test_nvim_config() {
+    echo "Testing nvim config..."
+    nvim --headless -c "checkhealth" -c "qa" 2>/dev/null && 
+        echo "✅ nvim config OK" || echo "❌ nvim config issues"
+}
