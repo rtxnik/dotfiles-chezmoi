@@ -120,8 +120,6 @@ export KEYTIMEOUT=1
 # ~~~~~~~~~~~~~~~ Aliases ~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-alias v=nvim
-
 if command -v bat > /dev/null ; then
   alias cat="bat"
 fi
@@ -133,6 +131,18 @@ if command -v lsd > /dev/null ; then
   alias lla='ls -lgha'
   alias lt='ls --tree'
 fi
+
+
+# Editor shortcuts
+alias v=nvim
+
+
+# Utils
+alias brewup='brew update; brew upgrade; brew cleanup; brew doctor'
+
+
+# Network
+alias ports='lsof -i -P | grep -i "listen"'
 
 
 # Directory navigation
@@ -175,6 +185,11 @@ alias lg='lazygit'
 
 alias in="cd \$ZETTELKASTEN/0\ Inbox/"
 alias cdzk="cd \$ZETTELKASTEN"
+
+
+# Fzf
+alias fp="fzf --preview 'bat --style=numbers --color=always --line-range :500 {}'"
+alias vf='v $(fp)'
 
 
 # Devpod
