@@ -100,7 +100,7 @@ setopt SHARE_HISTORY      # Share history between sessions
 # ~~~~~~~~~~~~~~~ Prompt ~~~~~~~~~~~~~~~~~~~~~~~~
 
 PURE_GIT_PULL=0
-# Universal pure prompt setup - works on both macOS and Ubuntu
+
 if [ -d "$HOME/.zsh/pure" ]; then
   fpath+=($HOME/.zsh/pure)
 elif [[ "$OSTYPE" == darwin* ]]; then
@@ -108,11 +108,14 @@ elif [[ "$OSTYPE" == darwin* ]]; then
 else
   fpath+=($HOME/.zsh/pure)
 fi
+
 autoload -U promptinit; promptinit
 prompt pure
+
 # enable zsh vi-mode
 bindkey -v
-export KEYTIMEOUT=1 # make switching between modes faster
+
+export KEYTIMEOUT=1
 
 # ~~~~~~~~~~~~~~~ Aliases ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -123,10 +126,6 @@ if command -v bat > /dev/null ; then
   alias cat="bat"
 fi
 
-alias scripts='cd $SCRIPTS'
-alias c="clear"
-alias icloud="cd \$ICLOUD"
-
 if command -v lsd > /dev/null ; then
   alias ls="lsd"
   alias ll="ls -lgh"
@@ -136,30 +135,39 @@ if command -v lsd > /dev/null ; then
 fi
 
 
-# Repos
-
+# Directory navigation
+alias ..='cd ..'
 alias lab='cd $LAB'
 alias dot='cd $HOME/.local/share/chezmoi'
 alias repos='cd $REPOS'
 alias ghrepos='cd $GHREPOS'
-alias gr='ghrepos'
+alias icloud='cd $ICLOUD'
+alias scripts='cd $SCRIPTS'
+alias docs='cd $DOCUMENTS'
+alias down='cd $DOWNLOADS'
+
+
+# System operations
+alias e='exit'
+alias c='clear'
+alias t='tmux'
+
 
 # Homelab
-
 alias homelab='cd $GHREPOS/homelab/'
 alias hl='homelab'
 
 # finds all files recursively and sorts by last modification, ignore hidden files
 alias lastmod='find . -type f -not -path "*/\.*" -exec ls -lrt {} +'
 
-alias t='tmux'
-alias e='exit'
 
-
-# Git
-
-alias gp='git pull'
+# Git shortcuts
 alias gs='git status'
+alias ga='git add'
+alias gc='git commit -m'
+alias gp='git push'
+alias gpl='git pull'
+alias gl='git log --graph --oneline --all --decorate'
 alias lg='lazygit'
 
 
@@ -168,7 +176,6 @@ alias lg='lazygit'
 alias in="cd \$ZETTELKASTEN/0\ Inbox/"
 alias cdzk="cd \$ZETTELKASTEN"
 
-alias pc='pass show -c'
 
 # Devpod
 
