@@ -1,0 +1,24 @@
+#!/bin/bash
+# Генерация commit message на основе изменений
+set -euo pipefail
+if ! git diff --staged --quiet; then
+    changes=$(git diff --staged --name-only | head -5)
+else
+    git add .
+    changes=$(git diff --staged --name-only | head -5)
+fi
+if command -v fabric >/dev/null 2>&1; then
+    commit_msg=$(git diff --staged | fabric -p commit_message)
+else
+    commit_msg="Update $(echo "$changes" | wc -l) files: $(echo "$changes" | tr '\n' ',' | sed 's/,$//')"
+fi
+echo "Commit message: $commit_msg"
+read -p "Use this message? (y/N): " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    git commit -m "$commit_msg"
+    echo "[OK] Committed!"
+else
+    read -p "Enter custom message: " custom_msg
+    git commit -m "$custom_msg"
+fi

@@ -1,0 +1,35 @@
+#!/bin/bash
+# Создание структуры нового проекта с git инициализацией
+set -euo pipefail
+project_name="${1:-}"
+project_type="${2:-general}"
+if [[ -z "$project_name" ]]; then
+    read -p "Project name: " project_name
+fi
+mkdir -p "$project_name"
+cd "$project_name"
+case "$project_type" in
+    go)
+        mkdir -p {cmd,internal,pkg,scripts,docs}
+        echo "# $project_name" > README.md
+        echo "*.log" > .gitignore
+        echo "/bin/" >> .gitignore
+        go mod init "$project_name"
+        ;;
+    node)
+        mkdir -p {src,tests,docs}
+        echo "# $project_name" > README.md
+        echo "node_modules/" > .gitignore
+        echo "*.log" >> .gitignore
+        npm init -y
+        ;;
+    *)
+        mkdir -p {src,docs,scripts}
+        echo "# $project_name" > README.md
+        echo "*.log" > .gitignore
+        ;;
+esac
+git init
+git add .
+git commit -m "Initial commit"
+echo "[OK] Project $project_name created!"

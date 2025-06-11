@@ -1,0 +1,42 @@
+#!/bin/bash
+# Генератор безопасных паролей
+length="${1:-16}"
+type="${2:-mixed}"
+case "$type" in
+    simple)
+        chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        ;;
+    complex)
+        chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-="
+        ;;
+    pin)
+        chars="0123456789"
+        length=6
+        ;;
+    *)
+        chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        ;;
+esac
+if command -v openssl >/dev/null 2>&1; then
+    password=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-$length)
+else
+    password=""
+    for i in $(seq 1 $length); do
+        char_index=$(( RANDOM % ${#chars} ))
+        password+="${chars:$char_index:1}"
+    done
+fi
+echo "Generated password: $password"
+if command -v pbcopy >/dev/null 2>&1; then
+    echo "$password" | pbcopy
+    echo "[OK] Password copied to clipboard (macOS)"
+elif command -v xclip >/dev/null 2>&1; then
+    echo "$password" | xclip -selection clipboard
+    echo "[OK] Password copied to clipboard (Linux)"
+elif command -v wl-copy >/dev/null 2>&1; then
+    echo "$password" | wl-copy
+    echo "[OK] Password copied to clipboard (Wayland)"
+fi
+echo -e "\nPassword strength analysis:"
+echo "Length: $length characters"
+echo "Character set size: ${#chars}"

@@ -1,0 +1,25 @@
+#!/bin/bash
+# Кроссплатформенная системная информация
+echo "=== System Information ==="
+echo "Hostname: $(hostname)"
+echo "User: $USER"
+echo "Date: $(date)"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    echo "OS: macOS $(sw_vers -productVersion)"
+    echo "CPU: $(sysctl -n machdep.cpu.brand_string)"
+    echo "Memory: $(( $(sysctl -n hw.memsize) / 1024 / 1024 / 1024 ))GB"
+elif [[ "$OSTYPE" == "linux"* ]]; then
+    echo "OS: $(lsb_release -d 2>/dev/null | cut -f2 || cat /etc/os-release | grep PRETTY_NAME | cut -d'\"' -f2)"
+    echo "CPU: $(grep 'model name' /proc/cpuinfo | head -1 | cut -d':' -f2 | xargs)"
+    echo "Memory: $(free -h | grep Mem | awk '{print $2}')"
+fi
+echo -e "\n=== Disk Usage ==="
+df -h | grep -E '^(/dev/|Filesystem)' | head -5
+echo -e "\n=== Network ==="
+if command -v ip >/dev/null 2>&1; then
+    ip route | grep default | head -1
+else
+    route -n get default 2>/dev/null | grep gateway || echo "No default route"
+fi
+echo -e "\n=== Uptime ==="
+uptime
