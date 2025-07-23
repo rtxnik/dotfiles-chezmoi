@@ -1,0 +1,69 @@
+#!/bin/bash
+# Простой трекер времени для задач
+TIMETRACK_DIR="$HOME/.timetrack"
+CURRENT_FILE="$TIMETRACK_DIR/current"
+LOG_FILE="$TIMETRACK_DIR/log.csv"
+mkdir -p "$TIMETRACK_DIR"
+if [[ ! -f "$LOG_FILE" ]]; then
+    echo "start_time,end_time,task,duration_minutes" > "$LOG_FILE"
+fi
+start_task() {
+    local task="$1"
+    if [[ -f "$CURRENT_FILE" ]]; then
+        echo "WARNING: Task already running: $(cat "$CURRENT_FILE" | cut -d'|' -f2)"
+        echo "Stop current task first with: timetrack stop"
+        exit 1
+    fi
+    local start_time=$(date +%s)
+    echo "${start_time}|${task}" > "$CURRENT_FILE"
+    echo "Started tracking: $task"
+    echo "Start time: $(date)"
+}
+stop_task() {
+    if [[ ! -f "$CURRENT_FILE" ]]; then
+        echo "ERROR: No active task"
+        exit 1
+    fi
+    local current_data=$(cat "$CURRENT_FILE")
+    local start_time=$(echo "$current_data" | cut -d'|' -f1)
+    local task=$(echo "$current_data" | cut -d'|' -f2)
+    local end_time=$(date +%s)
+    local duration_minutes=$(( (end_time - start_time) / 60 ))
+    echo "$(date -d @$start_time),$(date -d @$end_time),\"$task\",$duration_minutes" >> "$LOG_FILE"
+    rm "$CURRENT_FILE"
+    echo "[OK] Stopped tracking: $task"
+    echo "Duration: ${duration_minutes} minutes"
+}
+status_task() {
+    if [[ ! -f "$CURRENT_FILE" ]]; then
+        echo "No active task"
+        exit 0
+    fi
+    local current_data=$(cat "$CURRENT_FILE")
+    local start_time=$(echo "$current_data" | cut -d'|' -f1)
+    local task=$(echo "$current_data" | cut -d'|' -f2)
+    local current_time=$(date +%s)
+    local elapsed_minutes=$(( (current_time - start_time) / 60 ))
+    echo "Current task: $task"
+    echo "Elapsed time: ${elapsed_minutes} minutes"
+    echo "Started at: $(date -d @$start_time)"
+}
+case "${1:-status}" in
+    start)
+        if [[ -z "${2:-}" ]]; then
+            read -p "Task name: " task_name
+        else
+            task_name="$2"
+        fi
+        start_task "$task_name"
+        ;;
+    stop)
+        stop_task
+        ;;
+    status)
+        status_task
+        ;;
+    *)
+        echo "Usage: timetrack [start|stop|status] [task_name]"
+        ;;
+esac

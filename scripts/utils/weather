@@ -1,0 +1,22 @@
+#!/bin/bash
+# Получение погоды через wttr.in
+location="${1:-}"
+format="${2:-1}"
+if [[ -z "$location" ]]; then
+    location=""
+fi
+echo "Weather forecast for ${location:-your location}:"
+case "$format" in
+    1)
+        curl -s "wttr.in/${location}?1" 2>/dev/null || echo "ERROR: Unable to fetch weather"
+        ;;
+    2)
+        curl -s "wttr.in/${location}?2" 2>/dev/null || echo "ERROR: Unable to fetch weather"
+        ;;
+    moon)
+        curl -s "wttr.in/moon" 2>/dev/null || echo "ERROR: Unable to fetch moon phase"
+        ;;
+    *)
+        curl -s "wttr.in/${location}" 2>/dev/null || echo "ERROR: Unable to fetch weather"
+        ;;
+esac

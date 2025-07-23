@@ -1,0 +1,34 @@
+#!/bin/bash
+
+echo "=== System Health Check ==="
+
+# Проверка ключевых команд
+commands=("nvim" "tmux" "git" "mise" "chezmoi")
+for cmd in "${commands[@]}"; do
+    if command -v "$cmd" >/dev/null 2>&1; then
+        echo "✅ $cmd: $(command -v "$cmd")"
+    else
+        echo "❌ $cmd: NOT FOUND"
+    fi
+done
+
+# Проверка конфигураций
+configs=(
+    "$HOME/.zshrc"
+    "$HOME/.tmux.conf" 
+    "$HOME/.config/nvim/init.lua"
+    "$HOME/.config/alacritty/alacritty.toml"
+)
+
+echo -e "\n=== Configuration Files ==="
+for config in "${configs[@]}"; do
+    if [[ -f "$config" ]]; then
+        echo "✅ $config"
+    else
+        echo "❌ $config: MISSING"
+    fi
+done
+
+# Проверка mise tools
+echo -e "\n=== Mise Tools ==="
+mise list 2>/dev/null || echo "❌ Mise not configured"

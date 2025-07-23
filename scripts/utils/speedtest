@@ -1,0 +1,16 @@
+#!/bin/bash
+# Простой тест скорости через curl
+echo "Testing internet speed..."
+echo "Testing download speed..."
+download_speed=$(curl -w "%{speed_download}" -o /dev/null -s "http://speedtest.wdc01.softlayer.com/downloads/test100.zip")
+download_mbps=$(echo "scale=2; $download_speed / 1024 / 1024 * 8" | bc -l 2>/dev/null || echo "N/A")
+echo "Download speed: ${download_mbps} Mbps"
+echo "Testing latency..."
+if command -v ping >/dev/null 2>&1; then
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        ping_result=$(ping -c 4 8.8.8.8 | grep "round-trip" | cut -d'=' -f2 | cut -d'/' -f2)
+    else
+        ping_result=$(ping -c 4 8.8.8.8 | grep "rtt" | cut -d'=' -f2 | cut -d'/' -f2)
+    fi
+    echo "Average ping: ${ping_result}ms"
+fi

@@ -1,0 +1,30 @@
+#!/bin/bash
+# Кроссплатформенная проверка портов
+port="${1:-}"
+if [[ -z "$port" ]]; then
+    echo "Usage: portcheck <port>"
+    echo "       portcheck list  # показать все занятые порты"
+    exit 1
+fi
+if [[ "$port" == "list" ]]; then
+    echo "=== Active network connections ==="
+    if command -v ss >/dev/null 2>&1; then
+        ss -tulpn
+    elif command -v netstat >/dev/null 2>&1; then
+        netstat -tulpn
+    else
+        echo "Neither ss nor netstat available"
+        exit 1
+    fi
+else
+    if command -v ss >/dev/null 2>&1; then
+        ss -tulpn | grep ":$port "
+    else
+        netstat -tulpn | grep ":$port "
+    fi
+    if [[ $? -eq 0 ]]; then
+        echo "Port $port is in use"
+    else
+        echo "Port $port is free"
+    fi
+fi

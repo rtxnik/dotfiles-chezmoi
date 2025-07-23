@@ -1,0 +1,52 @@
+#!/bin/bash
+# Очистка временных файлов и кэшей
+set -euo pipefail
+echo "=== System Cleanup ==="
+cleaned_space=0
+calc_freed_space() {
+    local before="$1"
+    local after="$2"
+    echo $(( before - after ))
+}
+if [[ -d "/tmp" ]]; then
+    before=$(du -sm /tmp 2>/dev/null | cut -f1 || echo "0")
+    sudo find /tmp -type f -mtime +7 -delete 2>/dev/null || true
+    after=$(du -sm /tmp 2>/dev/null | cut -f1 || echo "0")
+    tmp_freed=$(calc_freed_space "$before" "$after")
+    echo "[OK] /tmp cleaned: ${tmp_freed}MB freed"
+    cleaned_space=$((cleaned_space + tmp_freed))
+fi
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    echo "macOS cleanup..."
+    if [[ -d "$HOME/Library/Caches" ]]; then
+        before=$(du -sm "$HOME/Library/Caches" 2>/dev/null | cut -f1 || echo "0")
+        find "$HOME/Library/Caches" -type f -mtime +30 -delete 2>/dev/null || true
+        after=$(du -sm "$HOME/Library/Caches" 2>/dev/null | cut -f1 || echo "0")
+        cache_freed=$(calc_freed_space "$before" "$after")
+        echo "[OK] User caches cleaned: ${cache_freed}MB freed"
+        cleaned_space=$((cleaned_space + cache_freed))
+    fi
+    if command -v trash >/dev/null 2>&1; then
+        trash -e
+        echo "[OK] Trash emptied"
+    fi
+elif [[ "$OSTYPE" == "linux"* ]]; then
+    echo "Linux cleanup..."
+    if command -v apt >/dev/null 2>&1; then
+        sudo apt autoremove -y >/dev/null 2>&1 || true
+        sudo apt autoclean >/dev/null 2>&1 || true
+        echo "[OK] APT cache cleaned"
+    elif command -v yum >/dev/null 2>&1; then
+        sudo yum clean all >/dev/null 2>&1 || true
+        echo "[OK] YUM cache cleaned"
+    fi
+    if command -v journalctl >/dev/null 2>&1; then
+        sudo journalctl --vacuum-time=7d >/dev/null 2>&1 || true
+        echo "[OK] Journal logs cleaned"
+    fi
+fi
+if command -v docker >/dev/null 2>&1; then
+    docker system prune -f >/dev/null 2>&1 || true
+    echo "[OK] Docker cleanup completed"
+fi
+echo -e "\nTotal space freed: ${cleaned_space}MB"
